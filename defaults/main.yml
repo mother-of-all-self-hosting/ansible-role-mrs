@@ -11,14 +11,16 @@
 mrs_enabled: false  # Not enabled by default, as it is not quite expected to be integrated to mash-playbook.
 
 mrs_identifier: mrs
+mrs_base_path: "/mrs"
+mrs_data_dir_path: "{{ mrs_base_path }}/data"
 
-# The fully-qualified name of your Matrix Rooms Search API server (e.g. `mrs.example.com`)
-mrs_hostname: ''
+mrs_version: v0.1.0
 
 mrs_uid: ''
 mrs_gid: ''
 
-mrs_version: v0.1.0
+# The fully-qualified name of your Matrix Rooms Search API server (e.g. `mrs.example.com`)
+mrs_hostname: ''
 
 mrs_container_image: "{{ mrs_container_image_registry_prefix }}etkecc/mrs:{{ mrs_container_image_tag }}"
 mrs_container_image_tag: "{{ mrs_version }}"
@@ -27,11 +29,14 @@ mrs_container_image_registry_prefix_upstream: "{{ mrs_container_image_registry_p
 mrs_container_image_registry_prefix_upstream_default: ghcr.io/
 mrs_container_image_force_pull: "{{ mrs_container_image.endswith(':latest') }}"
 
+# mrs_container_http_bind_port controls whether (and how) the container
+# exposes its HTTP port.
+# Leave empty to not expose it.
+# Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
+mrs_container_http_bind_port: ''
+
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 mrs_container_network: "{{ mrs_identifier }}"
-
-# Extra arguments to pass to the container.
-mrs_container_extra_arguments: []
 
 # The port number in the container
 mrs_container_http_port: 8080
@@ -42,8 +47,45 @@ mrs_container_additional_networks: "{{ mrs_container_additional_networks_auto + 
 mrs_container_additional_networks_auto: []
 mrs_container_additional_networks_custom: []
 
-mrs_base_path: "/mrs"
-mrs_data_dir_path: "{{ mrs_base_path }}/data"
+# mrs_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `mrs_container_labels_additional_labels`.
+mrs_container_labels_traefik_enabled: true
+mrs_container_labels_traefik_docker_network: ''
+mrs_container_labels_traefik_rule: "Host(`{{ mrs_hostname }}`)"
+mrs_container_labels_traefik_entrypoints: web-secure
+mrs_container_labels_traefik_tls: "{{ mrs_container_labels_traefik_entrypoints != 'web' }}"
+mrs_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# mrs_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
+#
+# Example:
+# mrs_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+mrs_container_labels_additional_labels: ''
+
+# Extra arguments to pass to the container.
+mrs_container_extra_arguments: []
+
+# List of systemd services that the MRS systemd service depends on
+mrs_systemd_required_services_list: "{{ mrs_systemd_required_services_list_default + mrs_systemd_required_services_list_auto + mrs_systemd_required_services_list_custom }}"
+mrs_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+mrs_systemd_required_services_list_auto: []
+mrs_systemd_required_services_list_custom: []
+
+# List of systemd services that the MRS systemd service wants
+mrs_systemd_wanted_services_list: []
+
+# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# mrs_environment_variables_additional_variables: |
+#   VAR=1
+#   ANOTHER=value
+mrs_environment_variables_additional_variables: ''
 
 mrs_sentry_dsn: ''
 mrs_healthchecks_url: 'https://hc-ping.com'
@@ -170,46 +212,3 @@ mrs_blocklist_ips: []
 mrs_blocklist_servers: []
 # words to avoid in search
 mrs_blocklist_queries: []
-
-# List of systemd services that the MRS systemd service depends on
-mrs_systemd_required_services_list: "{{ mrs_systemd_required_services_list_default + mrs_systemd_required_services_list_auto + mrs_systemd_required_services_list_custom }}"
-mrs_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
-mrs_systemd_required_services_list_auto: []
-mrs_systemd_required_services_list_custom: []
-
-# List of systemd services that the MRS systemd service wants
-mrs_systemd_wanted_services_list: []
-
-# mrs_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
-# See `../templates/labels.j2` for details.
-#
-# To inject your own other container labels, see `mrs_container_labels_additional_labels`.
-mrs_container_labels_traefik_enabled: true
-mrs_container_labels_traefik_docker_network: ''
-mrs_container_labels_traefik_rule: "Host(`{{ mrs_hostname }}`)"
-mrs_container_labels_traefik_entrypoints: web-secure
-mrs_container_labels_traefik_tls: "{{ mrs_container_labels_traefik_entrypoints != 'web' }}"
-mrs_container_labels_traefik_tls_certResolver: default  # noqa var-naming
-
-# mrs_container_http_bind_port controls whether (and how) the container
-# exposes its HTTP port.
-# Leave empty to not expose it.
-# Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
-mrs_container_http_bind_port: ''
-
-# mrs_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `../templates/labels.j2` for details.
-#
-# Example:
-# mrs_container_labels_additional_labels: |
-#   my.label=1
-#   another.label="here"
-mrs_container_labels_additional_labels: ''
-
-# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
-#
-# Example:
-# mrs_environment_variables_additional_variables: |
-#   VAR=1
-#   ANOTHER=value
-mrs_environment_variables_additional_variables: ''
