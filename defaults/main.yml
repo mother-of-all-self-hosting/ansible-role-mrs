@@ -8,7 +8,7 @@
 
 ---
 
-mrs_enabled: false
+mrs_enabled: false  # Not enabled by default, as it is not quite expected to be integrated to mash-playbook.
 
 mrs_identifier: mrs
 
