@@ -18,6 +18,9 @@ traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.accesscontrolallowhea
 traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.accesscontrolalloworiginlist={{ mrs_cors_allow_origins | join(',') }}
 traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.accesscontrolmaxage={{ mrs_cors_max_age }}
 traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.addvaryheader=true
+traefik.http.middlewares.{{ mrs_identifier }}-compress.compress=true
+traefik.http.middlewares.{{ mrs_identifier }}-compress.compress.includedcontenttypes=application/json
+
 
 traefik.http.routers.{{ mrs_identifier }}.rule={{ mrs_container_labels_traefik_rule }}
 traefik.http.routers.{{ mrs_identifier }}.service={{ mrs_identifier }}
