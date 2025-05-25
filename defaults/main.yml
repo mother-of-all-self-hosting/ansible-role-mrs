@@ -8,7 +8,7 @@
 
 ---
 
-mrs_enabled: true
+mrs_enabled: false
 
 mrs_identifier: mrs
 
