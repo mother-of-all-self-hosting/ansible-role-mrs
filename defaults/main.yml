@@ -30,6 +30,9 @@ mrs_container_image_force_pull: "{{ mrs_container_image.endswith(':latest') }}"
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 mrs_container_network: "{{ mrs_identifier }}"
 
+# Extra arguments to pass to the container.
+mrs_container_extra_arguments: []
+
 # The port number in the container
 mrs_container_http_port: 8080
 

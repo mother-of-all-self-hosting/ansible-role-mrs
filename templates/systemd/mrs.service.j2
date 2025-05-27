@@ -38,6 +38,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			--label-file={{ mrs_base_path }}/labels \
 			--mount type=bind,src={{ mrs_base_path }},dst=/mnt \
 			--tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+			{% for arg in mrs_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
 			{{ mrs_container_image }} \
 			-c {{ mrs_path_config }}
 
