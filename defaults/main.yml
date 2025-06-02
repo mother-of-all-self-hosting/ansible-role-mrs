@@ -8,7 +8,7 @@
 
 ---
 
-mrs_enabled: true
+mrs_enabled: false  # Not enabled by default, as it is not quite expected to be integrated to mash-playbook.
 
 mrs_identifier: mrs
 mrs_base_path: "/mrs"
@@ -67,6 +67,9 @@ mrs_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 #   another.label="here"
 mrs_container_labels_additional_labels: ''
 
+# A list of extra arguments to pass to the container (`docker run` command)
+mrs_container_extra_arguments: []
+
 # List of systemd services that the MRS systemd service depends on
 mrs_systemd_required_services_list: "{{ mrs_systemd_required_services_list_default + mrs_systemd_required_services_list_auto + mrs_systemd_required_services_list_custom }}"
 mrs_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
@@ -75,6 +78,14 @@ mrs_systemd_required_services_list_custom: []
 
 # List of systemd services that the MRS systemd service wants
 mrs_systemd_wanted_services_list: []
+
+# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# mrs_environment_variables_additional_variables: |
+#   VAR=1
+#   ANOTHER=value
+mrs_environment_variables_additional_variables: ''
 
 mrs_sentry_dsn: ''
 mrs_healthchecks_url: 'https://hc-ping.com'
@@ -201,11 +212,3 @@ mrs_blocklist_ips: []
 mrs_blocklist_servers: []
 # words to avoid in search
 mrs_blocklist_queries: []
-
-# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
-#
-# Example:
-# mrs_environment_variables_additional_variables: |
-#   VAR=1
-#   ANOTHER=value
-mrs_environment_variables_additional_variables: ''

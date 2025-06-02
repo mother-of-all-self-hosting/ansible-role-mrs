@@ -19,6 +19,7 @@ traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.accesscontrolallowori
 traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.accesscontrolmaxage={{ mrs_cors_max_age }}
 traefik.http.middlewares.{{ mrs_identifier }}-cors.headers.addvaryheader=true
 
+
 traefik.http.routers.{{ mrs_identifier }}.rule={{ mrs_container_labels_traefik_rule }}
 traefik.http.routers.{{ mrs_identifier }}.service={{ mrs_identifier }}
 traefik.http.routers.{{ mrs_identifier }}.middlewares={{ mrs_identifier }}-cors
