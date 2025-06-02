@@ -67,7 +67,7 @@ mrs_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 #   another.label="here"
 mrs_container_labels_additional_labels: ''
 
-# Extra arguments to pass to the container.
+# A list of extra arguments to pass to the container (`docker run` command)
 mrs_container_extra_arguments: []
 
 # List of systemd services that the MRS systemd service depends on
