@@ -118,6 +118,12 @@ mrs_auth_metrics_password: ''
 # list of IPs allowed to access metrics endpoints
 mrs_auth_metrics_ips: []
 
+# catalog credentials
+mrs_auth_catalog_login: ''
+mrs_auth_catalog_password: ''
+# list of IPs allowed to access catalog endpoints
+mrs_auth_catalog_ips: []
+
 # discovery credentials
 mrs_auth_discovery_login: ''
 mrs_auth_discovery_password: ''
