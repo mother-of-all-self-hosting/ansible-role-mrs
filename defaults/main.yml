@@ -29,6 +29,12 @@ mrs_container_image_registry_prefix_upstream: "{{ mrs_container_image_registry_p
 mrs_container_image_registry_prefix_upstream_default: ghcr.io/
 mrs_container_image_force_pull: "{{ mrs_container_image.endswith(':latest') }}"
 
+mrs_container_image_self_build: false
+mrs_container_image_self_build_name: "etkecc/mrs:{{ mrs_container_image_self_build_repo_version }}"
+mrs_container_image_self_build_repo: "https://github.com/etkecc/mrs.git"
+mrs_container_image_self_build_repo_version: "{{ mrs_version if mrs_version != 'latest' else 'main' }}"
+mrs_container_image_self_build_src_files_path: "{{ mrs_base_path }}/docker-src"
+
 # mrs_container_http_bind_port controls whether (and how) the container
 # exposes its HTTP port.
 # Leave empty to not expose it.

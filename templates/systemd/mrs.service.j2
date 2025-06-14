@@ -41,7 +41,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			{% for arg in mrs_container_extra_arguments %}
 			{{ arg }} \
 			{% endfor %}
-			{{ mrs_container_image }} \
+			{{ mrs_container_image_self_build_name if mrs_container_image_self_build else mrs_container_image }} \
 			-c {{ mrs_path_config }}
 
 {% for network in mrs_container_additional_networks %}
