@@ -22,27 +22,27 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ mrs_identifier }} 2>/dev/null'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ mrs_identifier }} \
-			--log-driver=none \
-			--user={{ mrs_uid }}:{{ mrs_gid }} \
-			--cap-drop=ALL \
-			--read-only \
-			--hostname={{ mrs_hostname }} \
-			--network={{ mrs_container_network }} \
-			{% if mrs_container_http_bind_port %}
-			-p {{ mrs_container_http_bind_port }}:{{ mrs_container_http_port }} \
-			{% endif %}
-			--ulimit nofile=262144:262144 \
-			--env-file={{ mrs_base_path }}/env \
-			--label-file={{ mrs_base_path }}/labels \
-			--mount type=bind,src={{ mrs_base_path }},dst=/mnt \
-			--tmpfs=/tmp:rw,noexec,nosuid,size=512m \
-			{% for arg in mrs_container_extra_arguments %}
-			{{ arg }} \
-			{% endfor %}
-			{{ mrs_container_image_self_build_name if mrs_container_image_self_build else mrs_container_image }} \
-			-c {{ mrs_path_config }}
+      --rm \
+      --name={{ mrs_identifier }} \
+      --log-driver=none \
+      --user={{ mrs_uid }}:{{ mrs_gid }} \
+      --cap-drop=ALL \
+      --read-only \
+      --hostname={{ mrs_hostname }} \
+      --network={{ mrs_container_network }} \
+      {% if mrs_container_http_bind_port %}
+      -p {{ mrs_container_http_bind_port }}:{{ mrs_container_http_port }} \
+      {% endif %}
+      --ulimit nofile=262144:262144 \
+      --env-file={{ mrs_base_path }}/env \
+      --label-file={{ mrs_base_path }}/labels \
+      --mount type=bind,src={{ mrs_base_path }},dst=/mnt \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+      {% for arg in mrs_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
+      {{ mrs_container_image_self_build_name if mrs_container_image_self_build else mrs_container_image }} \
+      -c {{ mrs_path_config }}
 
 {% for network in mrs_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ mrs_identifier }}
