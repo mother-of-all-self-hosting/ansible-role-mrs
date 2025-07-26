@@ -28,6 +28,6 @@
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item }}`) when `mrs_container_labels_traefik_enabled`
-  when: "mrs_container_labels_traefik_enabled | bool and vars[item] == ''"
+  when: "mrs_container_labels_traefik_enabled | bool and lookup('vars', item, default='') | string | length == 0"
   with_items:
     - mrs_container_labels_traefik_docker_network
