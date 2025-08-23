@@ -83,7 +83,10 @@ mrs_systemd_required_services_list_auto: []
 mrs_systemd_required_services_list_custom: []
 
 # List of systemd services that the MRS systemd service wants
-mrs_systemd_wanted_services_list: []
+mrs_systemd_wanted_services_list: "{{ mrs_systemd_wanted_services_list_default + mrs_systemd_wanted_services_list_auto + mrs_systemd_wanted_services_list_custom }}"
+mrs_systemd_wanted_services_list_default: []
+mrs_systemd_wanted_services_list_auto: []
+mrs_systemd_wanted_services_list_custom: []
 
 # mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
 #
