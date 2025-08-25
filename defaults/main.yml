@@ -12,7 +12,7 @@ mrs_enabled: false  # Not enabled by default, as it is not quite expected to be 
 
 mrs_identifier: mrs
 mrs_base_path: "/mrs"
-mrs_data_dir_path: "{{ mrs_base_path }}/data"
+mrs_data_path: "{{ mrs_base_path }}/data"
 
 mrs_version: v0.1.0
 

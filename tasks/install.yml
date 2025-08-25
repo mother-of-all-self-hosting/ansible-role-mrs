@@ -14,7 +14,7 @@
     group: "{{ mrs_gid }}"
   with_items:
     - "{{ mrs_base_path }}"
-    - "{{ mrs_data_dir_path }}"
+    - "{{ mrs_data_path }}"
 
 - name: Ensure MRS support files created
   ansible.builtin.template:

@@ -11,6 +11,7 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "lookup('ansible.builtin.varnames', ('^' + item.old + '$'), wantlist=True) | length > 0"
   with_items:
+    - { "old": "mrs_data_dir_path", "new": "mrs_data_path" }
     - { "old": "mrs_systemd_required_systemd_services_list", "new": "mrs_systemd_required_services_list" }
     - { "old": "mrs_container_additional_environment_variables", "new": "+mrs_environment_variables_additional_variables" }
 
