@@ -91,6 +91,9 @@ mrs_systemd_wanted_services_list_default: []
 mrs_systemd_wanted_services_list_auto: []
 mrs_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
+mrs_environment_variables_tz: UTC
+
 # mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
 #
 # Example:
