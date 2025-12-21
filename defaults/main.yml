@@ -79,7 +79,7 @@ mrs_container_labels_additional_labels: "{{ mrs_container_labels_additional_labe
 mrs_container_labels_additional_labels_auto: {}
 mrs_container_labels_additional_labels_custom: {}
 
-# A list of extra arguments to pass to the container (`docker run` command)
+# A list of extra arguments to pass to the container (`docker create` command)
 mrs_container_extra_arguments: "{{ mrs_container_extra_arguments_auto + mrs_container_extra_arguments_custom }}"
 mrs_container_extra_arguments_auto: []
 mrs_container_extra_arguments_custom: []
