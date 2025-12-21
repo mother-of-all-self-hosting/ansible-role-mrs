@@ -19,7 +19,7 @@ mrs_version: v0.1.0
 mrs_uid: ""
 mrs_gid: ""
 
-# The fully-qualified name of your Matrix Rooms Search API server (e.g. `mrs.example.com`)
+# The hostname at which Matrix Rooms Search API is served.
 mrs_hostname: ""
 
 mrs_container_image: "{{ mrs_container_image_registry_prefix }}etkecc/mrs:{{ mrs_container_image_tag }}"
