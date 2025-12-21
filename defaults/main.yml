@@ -16,11 +16,11 @@ mrs_data_path: "{{ mrs_base_path }}/data"
 
 mrs_version: v0.1.0
 
-mrs_uid: ''
-mrs_gid: ''
+mrs_uid: ""
+mrs_gid: ""
 
 # The fully-qualified name of your Matrix Rooms Search API server (e.g. `mrs.example.com`)
-mrs_hostname: ''
+mrs_hostname: ""
 
 mrs_container_image: "{{ mrs_container_image_registry_prefix }}etkecc/mrs:{{ mrs_container_image_tag }}"
 mrs_container_image_tag: "{{ mrs_version }}"
@@ -39,7 +39,7 @@ mrs_container_image_self_build_src_files_path: "{{ mrs_base_path }}/docker-src"
 # exposes its HTTP port.
 # Leave empty to not expose it.
 # Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
-mrs_container_http_bind_port: ''
+mrs_container_http_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 mrs_container_network: "{{ mrs_identifier }}"
@@ -48,7 +48,7 @@ mrs_container_network: "{{ mrs_identifier }}"
 mrs_container_http_port: 8080
 
 # The HTTP address the container will listen on, leave empty to listen on all addresses (intended to be used as-is).
-mrs_container_http_address: ''
+mrs_container_http_address: ""
 
 # A list of additional container networks that the container would be connected to.
 # The playbook does not create these networks, so make sure they already exist.
@@ -61,7 +61,7 @@ mrs_container_additional_networks_custom: []
 #
 # To inject your own other container labels, see `mrs_container_labels_additional_labels`.
 mrs_container_labels_traefik_enabled: true
-mrs_container_labels_traefik_docker_network: ''
+mrs_container_labels_traefik_docker_network: ""
 mrs_container_labels_traefik_rule: "Host(`{{ mrs_hostname }}`)"
 mrs_container_labels_traefik_entrypoints: web-secure
 mrs_container_labels_traefik_tls: "{{ mrs_container_labels_traefik_entrypoints != 'web' }}"
@@ -105,20 +105,20 @@ mrs_environment_variables_tz: UTC
 # mrs_environment_variables_additional_variables: |
 #   VAR=1
 #   ANOTHER=value
-mrs_environment_variables_additional_variables: ''
+mrs_environment_variables_additional_variables: ""
 
-mrs_sentry_dsn: ''
+mrs_sentry_dsn: ""
 mrs_healthchecks_url: 'https://hc-ping.com'
-mrs_healthchecks_uuid: ''
+mrs_healthchecks_uuid: ""
 
 mrs_public_name: MRS
 mrs_public_ui: "https://{{ mrs_hostname }}"
 mrs_public_api: "https://{{ mrs_hostname }}"
 
 # matrix server config
-mrs_matrix_server_name: ''
+mrs_matrix_server_name: ""
 mrs_matrix_support_contacts: []
-mrs_matrix_support_page: ''
+mrs_matrix_support_page: ""
 mrs_matrix_keys: []
 
 # search config
@@ -127,38 +127,38 @@ mrs_search_defaults_offset: 0
 mrs_search_defaults_sort_by: "-_score"
 
 # admin credentials
-mrs_auth_admin_login: ''
-mrs_auth_admin_password: ''
+mrs_auth_admin_login: ""
+mrs_auth_admin_password: ""
 # list of IPs allowed to access admin endpoints
 mrs_auth_admin_ips: []
 
 # metrics credentials
-mrs_auth_metrics_login: ''
-mrs_auth_metrics_password: ''
+mrs_auth_metrics_login: ""
+mrs_auth_metrics_password: ""
 # list of IPs allowed to access metrics endpoints
 mrs_auth_metrics_ips: []
 
 # catalog credentials
-mrs_auth_catalog_login: ''
-mrs_auth_catalog_password: ''
+mrs_auth_catalog_login: ""
+mrs_auth_catalog_password: ""
 # list of IPs allowed to access catalog endpoints
 mrs_auth_catalog_ips: []
 
 # discovery credentials
-mrs_auth_discovery_login: ''
-mrs_auth_discovery_password: ''
+mrs_auth_discovery_login: ""
+mrs_auth_discovery_password: ""
 # list of IPs allowed to access discovery endpoints
 mrs_auth_discovery_ips: []
 
 # moderation credentials
-mrs_auth_moderation_login: ''
-mrs_auth_moderation_password: ''
+mrs_auth_moderation_login: ""
+mrs_auth_moderation_password: ""
 # list of IPs allowed to access moderation endpoints
 mrs_auth_moderation_ips: []
 
 # webhooks
-mrs_webhooks_moderation: ''
-mrs_webhooks_stats: ''
+mrs_webhooks_moderation: ""
+mrs_webhooks_stats: ""
 
 # CORS
 mrs_cors_allow_origins: ['*']
@@ -169,18 +169,18 @@ mrs_cors_max_age: 0
 # cache
 mrs_cache_max_age: 0
 mrs_cache_max_age_search: 0
-mrs_cache_bunny_url: ''
-mrs_cache_bunny_key: ''
+mrs_cache_bunny_url: ""
+mrs_cache_bunny_key: ""
 
 # plausible.io
-mrs_plausible_host: ''
-mrs_plausible_domain: ''
+mrs_plausible_host: ""
+mrs_plausible_domain: ""
 
 # cron
-mrs_cron_discovery: ''
-mrs_cron_parsing: ''
-mrs_cron_indexing: ''
-mrs_cron_full: ''
+mrs_cron_discovery: ""
+mrs_cron_parsing: ""
+mrs_cron_indexing: ""
+mrs_cron_full: ""
 
 # paths inside container
 mrs_path_index: "/mnt/data/index"
@@ -196,14 +196,14 @@ mrs_workers_discovery: 20
 mrs_workers_parsing: 5
 
 # mod email
-mrs_email_moderation: ''
+mrs_email_moderation: ""
 
 # postmark config
-mrs_email_postmark_server_token: ''
+mrs_email_postmark_server_token: ""
 
 # postmark config for reports
-mrs_email_postmark_report_message_stream: ''
-mrs_email_postmark_report_from: ''
+mrs_email_postmark_report_message_stream: ""
+mrs_email_postmark_report_from: ""
 
 # email templates (report)
 mrs_email_templates_report_subject: "{% raw %}{{ .Public.Name }}: Room {{ .Room.ID }} has been reported{% endraw %}"
