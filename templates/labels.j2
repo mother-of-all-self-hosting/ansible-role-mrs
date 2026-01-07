@@ -30,4 +30,6 @@ traefik.http.routers.{{ mrs_identifier }}.tls.certResolver={{ mrs_container_labe
 traefik.http.services.{{ mrs_identifier }}.loadbalancer.server.port={{ mrs_container_http_port }}
 {% endif %}
 
-{{ mrs_container_labels_additional_labels }}
+{% for arg in mrs_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
