@@ -20,9 +20,9 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ mrs_base_path }}/{{ item }}"
+    mode: "0640"
     owner: "{{ mrs_uid }}"
     group: "{{ mrs_gid }}"
-    mode: "0640"
   with_items:
     - config.yml
     - env
