@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2023 - 2025 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2023-2025 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -24,9 +24,16 @@
     owner: "{{ mrs_uid }}"
     group: "{{ mrs_gid }}"
   with_items:
-    - config.yml
     - env
     - labels
+
+- name: Ensure MRS configuration file installed
+  ansible.builtin.copy:
+    content: "{{ mrs_configuration | to_nice_yaml(indent=2, width=999999) }}"
+    dest: "{{ mrs_base_path }}/config.yml"
+    mode: "0640"
+    owner: "{{ mrs_uid }}"
+    group: "{{ mrs_gid }}"
 
 - name: Run if self-building of MRS container image is not enabled
   when: "not mrs_container_image_self_build | bool"

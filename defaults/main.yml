@@ -1,8 +1,9 @@
-# SPDX-FileCopyrightText: 2023 - 2025 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 Niels Bouma
+# SPDX-FileCopyrightText: 2023-2025 MASH project contributors
+# SPDX-FileCopyrightText: 2023-2025 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
-# SPDX-FileCopyrightText: 2025 MASH project contributors
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -238,3 +239,25 @@ mrs_blocklist_ips: []
 mrs_blocklist_servers: []
 # words to avoid in search
 mrs_blocklist_queries: []
+
+# Default MRS configuration template which covers the generic use case.
+# You can customize it by controlling the various variables inside it.
+#
+# For a more advanced customization, you can extend the default (see `mrs_configuration_yaml`)
+# or completely replace this variable with your own template.
+mrs_configuration_yaml: "{{ lookup('template', 'templates/config.yml.j2') }}"
+
+mrs_configuration_extension_yaml: |
+  # Your custom YAML configuration for MRS goes here.
+  # This configuration extends the default starting configuration (`mrs_configuration_yaml`).
+  #
+  # You can override individual variables from the default configuration, or introduce new ones.
+  #
+  # If you need something more special, you can take full control by
+  # completely redefining `mrs_configuration_yaml`.
+
+mrs_configuration_extension: "{{ mrs_configuration_extension_yaml | from_yaml if mrs_configuration_extension_yaml | from_yaml is mapping else {} }}"
+
+# Holds the final MRS configuration (a combination of the default and its extension).
+# You most likely don't need to touch this variable. Instead, see `mrs_configuration_yaml`.
+mrs_configuration: "{{ mrs_configuration_yaml | from_yaml | combine(mrs_configuration_extension, recursive=True) }}"
