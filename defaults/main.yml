@@ -72,7 +72,7 @@ mrs_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 # To add your own custom labels, use `mrs_container_labels_additional_labels_custom`
 #
 # Example:
-# mrs_container_labels_additional_labels_custom: |
+# mrs_container_labels_additional_labels_custom:
 #   - my.label=1
 #   - another.label="here"
 mrs_container_labels_additional_labels: "{{ mrs_container_labels_additional_labels_auto + mrs_container_labels_additional_labels_custom }}"
