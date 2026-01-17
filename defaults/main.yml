@@ -36,14 +36,14 @@ mrs_container_image_self_build_repo: "https://github.com/etkecc/mrs.git"
 mrs_container_image_self_build_repo_version: "{{ mrs_version if mrs_version != 'latest' else 'main' }}"
 mrs_container_image_self_build_src_files_path: "{{ mrs_base_path }}/docker-src"
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+mrs_container_network: "{{ mrs_identifier }}"
+
 # mrs_container_http_bind_port controls whether (and how) the container
 # exposes its HTTP port.
 # Leave empty to not expose it.
 # Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
 mrs_container_http_bind_port: ""
-
-# The base container network. It will be auto-created by this role if it doesn't exist already.
-mrs_container_network: "{{ mrs_identifier }}"
 
 # The port number in the container
 mrs_container_http_port: 8080
