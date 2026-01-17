@@ -39,10 +39,9 @@ mrs_container_image_self_build_src_files_path: "{{ mrs_base_path }}/docker-src"
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 mrs_container_network: "{{ mrs_identifier }}"
 
-# mrs_container_http_bind_port controls whether (and how) the container
-# exposes its HTTP port.
-# Leave empty to not expose it.
-# Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
+# Controls whether the container exposes its HTTP port (tcp/8080 in the container).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 mrs_container_http_bind_port: ""
 
 # The port number in the container
