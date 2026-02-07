@@ -51,7 +51,8 @@ mrs_container_http_port: 8080
 mrs_container_http_address: ""
 
 # A list of additional container networks that the container would be connected to.
-# The playbook does not create these networks, so make sure they already exist.
+# The role does not create these networks, so make sure they already exist.
+# Use this to expose this container to another reverse proxy, which runs in a different container network.
 mrs_container_additional_networks: "{{ mrs_container_additional_networks_auto + mrs_container_additional_networks_custom }}"
 mrs_container_additional_networks_auto: []
 mrs_container_additional_networks_custom: []
