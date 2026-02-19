@@ -103,17 +103,6 @@ mrs_systemd_wanted_services_list_default: []
 mrs_systemd_wanted_services_list_auto: []
 mrs_systemd_wanted_services_list_custom: []
 
-# Specify the timezone
-mrs_environment_variables_tz: UTC
-
-# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
-#
-# Example:
-# mrs_environment_variables_additional_variables: |
-#   VAR=1
-#   ANOTHER=value
-mrs_environment_variables_additional_variables: ""
-
 mrs_sentry_dsn: ""
 mrs_healthchecks_url: 'https://hc-ping.com'
 mrs_healthchecks_uuid: ""
@@ -267,3 +256,24 @@ mrs_configuration_extension: "{{ mrs_configuration_extension_yaml | from_yaml if
 # Holds the final MRS configuration (a combination of the default and its extension).
 # You most likely don't need to touch this variable. Instead, see `mrs_configuration_yaml`.
 mrs_configuration: "{{ mrs_configuration_yaml | from_yaml | combine(mrs_configuration_extension, recursive=True) }}"
+
+# Specify the timezone
+mrs_environment_variables_tz: UTC
+
+# mrs_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# mrs_environment_variables_additional_variables: |
+#   VAR=1
+#   ANOTHER=value
+mrs_environment_variables_additional_variables: ""
+
+# mrs_restart_necessary controls whether the MRS systemd
+# service will be restarted (when true) or merely started (when false) by the
+# systemd service manager role (when conditional restart is enabled).
+#
+# This value is automatically computed during installation based on whether
+# any configuration files, the systemd service file, or the container image changed.
+# The default of `false` means "no restart needed" — appropriate when the role's
+# installation tasks haven't run (e.g., due to --tags skipping them).
+mrs_restart_necessary: false
