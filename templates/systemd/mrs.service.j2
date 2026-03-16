@@ -29,8 +29,8 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --read-only \
       --hostname={{ mrs_hostname }} \
       --network={{ mrs_container_network }} \
-      {% if mrs_container_http_bind_port %}
-      -p {{ mrs_container_http_bind_port }}:{{ mrs_container_http_port }} \
+      {% if mrs_container_http_host_bind_port %}
+      -p {{ mrs_container_http_host_bind_port }}:{{ mrs_container_http_port }} \
       {% endif %}
       --ulimit nofile=262144:262144 \
       --env-file={{ mrs_base_path }}/env \
