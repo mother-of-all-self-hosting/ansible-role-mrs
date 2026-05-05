@@ -28,7 +28,6 @@ mrs_container_image_tag: "{{ mrs_version }}"
 mrs_container_image_registry_prefix: "{{ mrs_container_image_registry_prefix_upstream }}"
 mrs_container_image_registry_prefix_upstream: "{{ mrs_container_image_registry_prefix_upstream_default }}"
 mrs_container_image_registry_prefix_upstream_default: ghcr.io/
-mrs_container_image_force_pull: "{{ mrs_container_image.endswith(':latest') }}"
 
 mrs_container_image_self_build: false
 mrs_container_image_self_build_name: "etkecc/mrs:{{ mrs_container_image_self_build_repo_version }}"
