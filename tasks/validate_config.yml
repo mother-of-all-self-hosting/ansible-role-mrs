@@ -14,7 +14,10 @@
     - { "old": "mrs_data_dir_path", "new": "mrs_data_path" }
     - { "old": "mrs_container_http_bind_port", "new": "mrs_container_http_host_bind_port" }
     - { "old": "mrs_systemd_required_systemd_services_list", "new": "mrs_systemd_required_services_list" }
-    - { "old": "mrs_container_additional_environment_variables", "new": "+mrs_environment_variables_additional_variables" }
+    - { "old": "mrs_admin_login", "new": "mrs_auth_admin_login" }
+    - { "old": "mrs_admin_password", "new": "mrs_auth_admin_password" }
+    - { "old": "mrs_admin_ips", "new": "mrs_auth_admin_ips" }
+    - { "old": "mrs_container_additional_environment_variables", "new": "mrs_environment_variables_additional_variables" }
     - { "old": "mrs_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required MRS settings not defined
