@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2023 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023, 2026 Slavi Pantaleev
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -38,3 +38,56 @@
   when: "mrs_container_labels_traefik_enabled | bool and lookup('vars', item, default='') | string | length == 0"
   with_items:
     - mrs_container_labels_traefik_docker_network
+
+# MRS compares the credentials a caller presents against the configured login
+# and password with a plain equality check, and an empty login together with an
+# empty password compares equal to an empty login and an empty password. A
+# caller sending `Authorization: Basic Og==` is therefore let straight through
+# any API group whose credentials were left empty, unless that group also
+# carries an IP allowlist (an empty `*_ips` list means "any address").
+#
+# The role cannot fix this by refusing to install without credentials, as that
+# would break existing deployments, so it points the problem out instead.
+- name: Reset the list of MRS API groups left open to anonymous callers
+  ansible.builtin.set_fact:
+    mrs_auth_open_groups: []
+
+- name: Determine which MRS API groups are left open to anonymous callers
+  ansible.builtin.set_fact:
+    mrs_auth_open_groups: >-
+      {{
+        mrs_auth_open_groups
+        +
+        (
+          [item]
+          if (
+            lookup('vars', 'mrs_auth_' + item + '_login', default='') | string | length == 0
+            and lookup('vars', 'mrs_auth_' + item + '_password', default='') | string | length == 0
+            and lookup('vars', 'mrs_auth_' + item + '_ips', default=[]) | length == 0
+          )
+          else []
+        )
+      }}
+  with_items:
+    - admin
+    - catalog
+    - discovery
+    - metrics
+    - moderation
+
+- name: Inject the message about MRS API groups left open to anonymous callers
+  when: mrs_auth_open_groups | length > 0
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: the MRS API groups "
+          + (mrs_auth_open_groups | join(', '))
+          + " have neither credentials (`mrs_auth_<group>_login` / `mrs_auth_<group>_password`) nor an IP allowlist (`mrs_auth_<group>_ips`) configured."
+          + " MRS accepts an empty login together with an empty password as a valid credential, so these endpoints are reachable by anyone who can reach `"
+          + mrs_hostname
+          + "`. See the `Protecting the API groups` section of the role's README for what each group covers."
+        ]
+      }}
