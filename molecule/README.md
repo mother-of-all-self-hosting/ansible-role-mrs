@@ -49,6 +49,17 @@ Currently there is one testing scenario available.
 
 Tests a standard MRS installation.
 
+The scenario deliberately configures MRS with values that no MRS default could produce — a non-default HTTP port, its own Matrix server name (different from the hostname the container is served at), its own support contacts and its own admin credentials — and then reads them back out of the running instance's API. That is what keeps it honest, because MRS answers `200` on `/_health` for any configuration file that parses at all, reports a hardcoded `MatrixRoomsSearch/v0.0.0` in its `Server` header regardless of which version is running, and crash-loops invisibly behind the unit's `Restart=always` when its configuration cannot be read.
+
+The scenario therefore asserts, among other things, that:
+
+- the container is running, was created from the image `mrs_version` pins, and carries that version in its `org.opencontainers.image.version` label
+- MRS answers on the port the role configured (not on MRS's own default of `8080`)
+- `/_matrix/key/v2/server`, `/.well-known/matrix/support` and `/.well-known/matrix/server` report the values the role rendered
+- the admin endpoints accept the configured credentials, reject a wrong password, and reject an empty login/password pair
+- MRS created its database and search index under `mrs_data_path`
+- the container did not restart at any point during verification
+
 ## Running
 
 By default it is configured to run the scenarios on Ubuntu 26.04.

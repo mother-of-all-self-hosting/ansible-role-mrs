@@ -1,14 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 spatterlight
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify MRS systemd service
+# What this suite is guarding against, established by running the image by hand:
+#
+# - MRS panics and exits when it cannot read its configuration file, and the
+#   systemd unit carries `Restart=always`. `systemctl is-active` therefore
+#   reports `active` for a container that has been crash-looping since boot,
+#   which is why the container itself is inspected and why the process is
+#   checked for having stayed up across the whole run.
+# - `/_health` is registered on the bare router and answers 200 for any
+#   configuration that parses at all, including one where every value is empty.
+#   It is used here as a readiness gate, never as evidence.
+# - The `Server` header reports a hardcoded `MatrixRoomsSearch/v0.0.0` in every
+#   build (upstream never wires the version in at build time), so the running
+#   version is read from the container's image labels instead.
+#
+# Every assertion below therefore either names a value that only this role's
+# template could have produced, or reads the version from a surface that does
+# not lie.
+
+- name: Verify MRS
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    mrs_molecule_base_url: "http://127.0.0.1:{{ mrs_container_http_port }}"
+
   tasks:
+    - name: Read the role's defaults for values the scenario does not tune
+      # Loaded under a name of its own: these are the role's defaults, and they
+      # must never shadow the scenario's own group_vars.
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: mrs_role_defaults
+
     - name: Wait for MRS service to become active (up to 180s)
       ansible.builtin.systemd:
         name: mrs.service
@@ -17,37 +47,232 @@
       retries: 36
       delay: 5
 
-    - name: Assert MRS service is active
-      ansible.builtin.assert:
-        that: mrs_service.status.ActiveState == 'active'
-        fail_msg: "mrs.service not active ({{ mrs_service.status.ActiveState }})"
-        success_msg: "mrs.service is active"
-
     - name: Retrieve MRS service log for debugging
       when: mrs_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu mrs.service
       changed_when: false
 
-    - name: Wait for MRS HTTP endpoint to respond (up to 10m)
+    # The port is the scenario's, not MRS's default of 8080. MRS reads it from
+    # the `port` key of the configuration file, so an instance answering here
+    # has demonstrably read the file the role rendered. An instance that had
+    # not would be listening on nothing at all: with no configuration the
+    # process panics before it binds.
+    - name: Wait for MRS to answer on the configured port (up to 10m)
       ansible.builtin.uri:
-        url: "http://localhost:8080/_health"
+        url: "{{ mrs_molecule_base_url }}/_health"
         method: GET
-        status_code: [200, 302]
+        status_code: [200]
         follow_redirects: none
-      register: mrs_endpoint
-      until: mrs_endpoint.status in [200, 302]
+      register: mrs_health
+      until: mrs_health.status == 200
       retries: 120
       delay: 5
 
-    - name: Assert MRS HTTP endpoint responds
-      ansible.builtin.assert:
-        that: mrs_endpoint.status in [200, 302]
-        fail_msg: "MRS did not respond as expected ({{ mrs_endpoint.status | default('no response') }})"
-        success_msg: "MRS responded with {{ mrs_endpoint.status }}"
+    - name: Inspect the MRS container
+      ansible.builtin.command:
+        cmd: docker container inspect mrs
+      register: mrs_container_inspect
+      changed_when: false
 
-    - name: Show MRS systemd service status summary
+    - name: Record the state of the MRS container
+      ansible.builtin.set_fact:
+        mrs_container: "{{ mrs_container_inspect.stdout | from_json | first }}"
+
+    - name: Assert the MRS container is running
+      ansible.builtin.assert:
+        that: mrs_container.State.Status == 'running'
+        fail_msg: "The MRS container is {{ mrs_container.State.Status }}, not running"
+        success_msg: "The MRS container is running"
+
+    - name: Assert MRS runs the image the role pins
+      ansible.builtin.assert:
+        that: mrs_container.Config.Image == 'ghcr.io/etkecc/mrs:' + mrs_role_defaults.mrs_version
+        fail_msg: >-
+          The MRS container was created from {{ mrs_container.Config.Image }},
+          not from ghcr.io/etkecc/mrs:{{ mrs_role_defaults.mrs_version }}
+        success_msg: "The MRS container was created from {{ mrs_container.Config.Image }}"
+
+    # The tag alone would only prove which name was pulled. The image's own OCI
+    # label is stamped by upstream's release build, so this is the version that
+    # is actually running, and it is what makes a version bump testable.
+    - name: Assert the running MRS build reports the pinned version
+      ansible.builtin.assert:
+        that: >-
+          mrs_container.Config.Labels['org.opencontainers.image.version']
+          == mrs_role_defaults.mrs_version
+        fail_msg: >-
+          The running MRS build reports
+          {{ mrs_container.Config.Labels['org.opencontainers.image.version'] | default('no version label') }},
+          while defaults/main.yml pins {{ mrs_role_defaults.mrs_version }}
+        success_msg: "The running MRS build reports {{ mrs_role_defaults.mrs_version }}"
+
+    - name: Read the MRS configuration file the role rendered
+      ansible.builtin.slurp:
+        src: "{{ mrs_role_defaults.mrs_base_path }}/config.yml"
+      register: mrs_config_file
+
+    - name: Record the MRS configuration file the role rendered
+      ansible.builtin.set_fact:
+        mrs_config: "{{ mrs_config_file.content | b64decode | from_yaml }}"
+
+    # Only the leaves that no assertion further down covers from the API side,
+    # so that breaking one of those shows up there rather than here.
+    - name: Assert the role rendered the scenario's values into the configuration file
+      ansible.builtin.assert:
+        that:
+          - mrs_config.port | int == mrs_container_http_port | int
+          - mrs_config.public.name == mrs_public_name
+        fail_msg: "The rendered configuration file does not carry the scenario's values"
+        success_msg: "The rendered configuration file carries the scenario's values"
+
+    # `server_name` is the scenario's, and deliberately not the hostname the
+    # container is served at, so reading the wrong leaf of defaults/main.yml
+    # would show up here rather than passing by coincidence.
+    - name: Request the Matrix key endpoint
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/_matrix/key/v2/server"
+        method: GET
+        status_code: [200]
+        follow_redirects: none
+      register: mrs_matrix_key
+
+    - name: Assert MRS serves the configured Matrix server name
+      ansible.builtin.assert:
+        that: mrs_matrix_key.json.server_name == mrs_matrix_server_name
+        fail_msg: >-
+          MRS reports the Matrix server name
+          {{ mrs_matrix_key.json.server_name | default('none') }},
+          not {{ mrs_matrix_server_name }}
+        success_msg: "MRS reports the Matrix server name {{ mrs_matrix_server_name }}"
+
+    # A second, independent configuration leaf, and one that travels a
+    # different path through the template: a list of mappings rather than a
+    # scalar.
+    - name: Request the Matrix support well-known
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/.well-known/matrix/support"
+        method: GET
+        status_code: [200]
+        follow_redirects: none
+      register: mrs_wellknown_support
+
+    - name: Assert MRS serves the configured support contacts
+      ansible.builtin.assert:
+        that:
+          - mrs_wellknown_support.json.support_page == mrs_matrix_support_page
+          - mrs_wellknown_support.json.contacts | length == mrs_matrix_support_contacts | length
+          - mrs_wellknown_support.json.contacts[0].matrix_id == mrs_matrix_support_contacts[0].matrix_id
+          - mrs_wellknown_support.json.contacts[0].email_address == mrs_matrix_support_contacts[0].email_address
+        fail_msg: "MRS does not serve the support contacts the role configured"
+        success_msg: "MRS serves the support contacts the role configured"
+
+    # Derived from `mrs_public_api`, which is derived from `mrs_hostname`. The
+    # key this is published under is read out of the response rather than
+    # asserted on: MRS v0.1.0 spells it `s.server` (an upstream typo, fixed to
+    # the spec's `m.server` after the release), and this assertion is about the
+    # role's configuration reaching the process, not about that.
+    - name: Request the Matrix server well-known
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/.well-known/matrix/server"
+        method: GET
+        status_code: [200]
+        follow_redirects: none
+      register: mrs_wellknown_server
+
+    - name: Assert MRS serves a delegation for the configured hostname
+      ansible.builtin.assert:
+        that: (mrs_wellknown_server.json.values() | list | first) == mrs_hostname + ':443'
+        fail_msg: >-
+          MRS delegates to {{ mrs_wellknown_server.json.values() | list | first | default('nothing') }},
+          not to {{ mrs_hostname }}:443
+        success_msg: "MRS delegates to {{ mrs_hostname }}:443"
+
+    # MRS accepts an empty login together with an empty password as a valid
+    # credential, so the auth block only proves anything when it is populated.
+    # The three requests below show the middleware honouring exactly the
+    # credentials the role wrote, and refusing everything else.
+    #
+    # This one comes first on purpose. `Basic Og==` is an empty login and an
+    # empty password, which is what a caller sends to walk straight past any
+    # MRS API group left at this role's empty defaults. Were the credentials
+    # the role wrote to become empty again, this request would answer 200 and
+    # the failure would land here, rather than looking like a wrong password
+    # further down.
+    - name: Request the admin status endpoint with empty credentials
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/-/status"
+        method: GET
+        headers:
+          Authorization: "Basic Og=="
+        status_code: [401]
+        follow_redirects: none
+
+    - name: Request the admin status endpoint with the configured credentials
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/-/status"
+        method: GET
+        url_username: "{{ mrs_auth_admin_login }}"
+        url_password: "{{ mrs_auth_admin_password }}"
+        force_basic_auth: true
+        status_code: [200]
+        follow_redirects: none
+      register: mrs_admin_status
+
+    - name: Assert the admin endpoint answers with the configured credentials
+      ansible.builtin.assert:
+        that: mrs_admin_status.json.servers is defined
+        fail_msg: "The MRS admin status endpoint did not return a status document"
+        success_msg: "The MRS admin status endpoint answered with the configured credentials"
+
+    - name: Request the admin status endpoint with a wrong password
+      ansible.builtin.uri:
+        url: "{{ mrs_molecule_base_url }}/-/status"
+        method: GET
+        url_username: "{{ mrs_auth_admin_login }}"
+        url_password: "not-{{ mrs_auth_admin_password }}"
+        force_basic_auth: true
+        status_code: [401]
+        follow_redirects: none
+
+    - name: Check the state MRS keeps on the role's data path
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: mrs_state_files
+      loop:
+        - "{{ mrs_role_defaults.mrs_base_path }}/data/data.db"
+        - "{{ mrs_role_defaults.mrs_base_path }}/data/index/index_meta.json"
+
+    - name: Assert MRS wrote its database and index where the role told it to
+      ansible.builtin.assert:
+        that: item.stat.exists
+        fail_msg: "MRS did not create {{ item.item }}"
+        success_msg: "MRS created {{ item.item }}"
+      loop: "{{ mrs_state_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    # `Restart=always` would quietly paper over a container that crashes after
+    # answering the first request, so the process is checked for being the same
+    # one that was inspected before any of the assertions above ran.
+    - name: Inspect the MRS container again
+      ansible.builtin.command:
+        cmd: docker container inspect mrs
+      register: mrs_container_inspect_after
+      changed_when: false
+
+    - name: Assert MRS stayed up for the whole verification
+      ansible.builtin.assert:
+        that:
+          - (mrs_container_inspect_after.stdout | from_json | first).State.Status == 'running'
+          - (mrs_container_inspect_after.stdout | from_json | first).State.StartedAt == mrs_container.State.StartedAt
+        fail_msg: "The MRS container restarted while it was being verified"
+        success_msg: "The MRS container stayed up for the whole verification"
+
+    - name: Show MRS verification summary
       ansible.builtin.debug:
         msg:
           - "MRS systemd: {{ mrs_service.status.ActiveState }}"
-          - "MRS HTTP: {{ mrs_endpoint.status }}"
+          - "MRS version: {{ mrs_container.Config.Labels['org.opencontainers.image.version'] }}"
+          - "MRS port: {{ mrs_container_http_port }}"
+          - "MRS Matrix server name: {{ mrs_matrix_key.json.server_name }}"

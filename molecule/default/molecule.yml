@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 spatterlight
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
@@ -35,10 +36,32 @@ provisioner:
         mrs_enabled: true  # Because disabled by default
         mrs_uid: 1000
         mrs_gid: 1000
-        mrs_scheme: http
-        mrs_hostname: localhost
+        mrs_hostname: mrs.molecule.test
         mrs_container_labels_traefik_enabled: false
-        mrs_container_http_host_bind_port: 8080
+
+        # Deliberately not the role's default of 8080. MRS takes its listening
+        # port from the `port` key of the configuration file the role renders,
+        # so an instance answering on 8099 can only have read that file.
+        mrs_container_http_port: 8099
+        mrs_container_http_host_bind_port: 8099
+
+        # Values that no MRS default and no fallback of its own could produce,
+        # so that finding them in the API proves the role's own template
+        # reached the process. `mrs_matrix_server_name` is deliberately not
+        # `mrs_hostname`, so that reading the wrong leaf shows up.
+        mrs_public_name: MRS Molecule Fixture
+        mrs_matrix_server_name: mrs-molecule.example.test
+        mrs_matrix_support_page: https://example.test/mrs-molecule-support
+        mrs_matrix_support_contacts:
+          - matrix_id: "@mrs-molecule:example.test"
+            email_address: mrs-molecule@example.test
+            role: m.role.admin
+
+        # MRS treats an empty login/password pair as a valid credential, so a
+        # scenario left at the role's defaults would be asserting against an
+        # instance whose admin endpoints are open to everyone. See verify.yml.
+        mrs_auth_admin_login: molecule-admin
+        mrs_auth_admin_password: molecule-admin-password
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
