@@ -3,7 +3,7 @@ galaxy_info:
   author: etke.cc
   company: etke.cc
   role_name: mrs
-  namespace: etkecc
+  namespace: mash
   description: Matrix Rooms Search API
   platforms:
     - name: Debian
