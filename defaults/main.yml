@@ -15,6 +15,7 @@ mrs_identifier: mrs
 mrs_base_path: "/mrs"
 mrs_data_path: "{{ mrs_base_path }}/data"
 
+# renovate: datasource=docker depName=ghcr.io/etkecc/mrs versioning=semver
 mrs_version: v0.1.0
 
 mrs_uid: ""

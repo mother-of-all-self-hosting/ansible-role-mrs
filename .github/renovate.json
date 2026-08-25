@@ -1,5 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Bumps of `mrs_version` are proposed as pull requests and never automerged: MRS is pre-1.0, and it keeps a bbolt database and a Bleve index on the data path that nothing migrates between versions.",
+    "`versioning=semver` on the annotation in defaults/main.yml keeps the floating `latest` tag that ghcr.io/etkecc/mrs publishes alongside its releases out of the candidates."
+  ],
   "extends": [
     "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
   ]
