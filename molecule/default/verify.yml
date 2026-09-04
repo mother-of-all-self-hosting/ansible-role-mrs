@@ -270,7 +270,7 @@
         fail_msg: "The MRS container restarted while it was being verified"
         success_msg: "The MRS container stayed up for the whole verification"
 
-    - name: Show MRS verification summary
+    - name: Show the MRS verification summary
       ansible.builtin.debug:
         msg:
           - "MRS systemd: {{ mrs_service.status.ActiveState }}"
