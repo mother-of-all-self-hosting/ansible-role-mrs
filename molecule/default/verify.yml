@@ -97,16 +97,11 @@
     # The tag alone would only prove which name was pulled. The image's own OCI
     # label is stamped by upstream's release build, so this is the version that
     # is actually running, and it is what makes a version bump testable.
-    - name: Assert the running MRS build reports the pinned version
+    - name: Assert the running MRS is the version this role installs
       ansible.builtin.assert:
-        that: >-
-          mrs_container.Config.Labels['org.opencontainers.image.version']
-          == mrs_defaults.mrs_version
-        fail_msg: >-
-          The running MRS build reports
-          {{ mrs_container.Config.Labels['org.opencontainers.image.version'] | default('no version label') }},
-          while defaults/main.yml pins {{ mrs_defaults.mrs_version }}
-        success_msg: "The running MRS build reports {{ mrs_defaults.mrs_version }}"
+        that: "mrs_container.Config.Labels['org.opencontainers.image.version'] == mrs_defaults.mrs_version"
+        fail_msg: "MRS reports {{ mrs_container.Config.Labels['org.opencontainers.image.version'] | default('none') }}, expected {{ mrs_defaults.mrs_version }}"
+        success_msg: "MRS reports {{ mrs_container.Config.Labels['org.opencontainers.image.version'] }}"
 
     - name: Read the MRS configuration file the role rendered
       ansible.builtin.slurp:
