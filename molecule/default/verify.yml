@@ -185,7 +185,7 @@
       ansible.builtin.assert:
         that: (mrs_wellknown_server.json.values() | list | first) == mrs_hostname + ':443'
         fail_msg: >-
-          MRS delegates to {{ mrs_wellknown_server.json.values() | list | first | default('nothing') }},
+          MRS delegates to {{ mrs_wellknown_server.json.values() | list | first | default('none') }},
           not to {{ mrs_hostname }}:443
         success_msg: "MRS delegates to {{ mrs_hostname }}:443"
 
