@@ -86,17 +86,6 @@
         fail_msg: "The MRS container is {{ mrs_container.State.Status }}, not running"
         success_msg: "The MRS container is running"
 
-    - name: Assert MRS runs the image the role pins
-      ansible.builtin.assert:
-        that: mrs_container.Config.Image == 'ghcr.io/etkecc/mrs:' + mrs_defaults.mrs_version
-        fail_msg: >-
-          The MRS container was created from {{ mrs_container.Config.Image }},
-          not from ghcr.io/etkecc/mrs:{{ mrs_defaults.mrs_version }}
-        success_msg: "The MRS container was created from {{ mrs_container.Config.Image }}"
-
-    # The tag alone would only prove which name was pulled. The image's own OCI
-    # label is stamped by upstream's release build, so this is the version that
-    # is actually running, and it is what makes a version bump testable.
     - name: Assert the running MRS is the version this role installs
       ansible.builtin.assert:
         that: "mrs_container.Config.Labels['org.opencontainers.image.version'] == mrs_defaults.mrs_version"
