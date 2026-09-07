@@ -73,12 +73,12 @@
     - name: Inspect the MRS container
       ansible.builtin.command:
         cmd: docker container inspect mrs
-      register: mrs_container_inspect
+      register: mrs_container_raw
       changed_when: false
 
     - name: Record the state of the MRS container
       ansible.builtin.set_fact:
-        mrs_container: "{{ mrs_container_inspect.stdout | from_json | first }}"
+        mrs_container: "{{ mrs_container_raw.stdout | from_json | first }}"
 
     - name: Assert the MRS container is running
       ansible.builtin.assert:
@@ -243,14 +243,14 @@
     - name: Inspect the MRS container again
       ansible.builtin.command:
         cmd: docker container inspect mrs
-      register: mrs_container_inspect_after
+      register: mrs_container_raw_after
       changed_when: false
 
     - name: Assert MRS stayed up for the whole verification
       ansible.builtin.assert:
         that:
-          - (mrs_container_inspect_after.stdout | from_json | first).State.Status == 'running'
-          - (mrs_container_inspect_after.stdout | from_json | first).State.StartedAt == mrs_container.State.StartedAt
+          - (mrs_container_raw_after.stdout | from_json | first).State.Status == 'running'
+          - (mrs_container_raw_after.stdout | from_json | first).State.StartedAt == mrs_container.State.StartedAt
         fail_msg: "The MRS container restarted while it was being verified"
         success_msg: "The MRS container stayed up for the whole verification"
 
