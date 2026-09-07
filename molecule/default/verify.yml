@@ -40,15 +40,24 @@
         file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
         name: mrs_defaults
 
-    - name: Wait for MRS service to become active (up to 180s)
-      ansible.builtin.systemd:
+    - name: Wait for the MRS systemd service to become active (up to 180s)
+      ansible.builtin.systemd_service:
         name: mrs.service
       register: mrs_service
       until: mrs_service.status.ActiveState == 'active'
       retries: 36
       delay: 5
 
-    - name: Retrieve MRS service log for debugging
+    # `Restart=always` in the systemd unit means that even a container which crashes
+    # and gets restarted reads as active here, so this is a precondition rather than
+    # a result.
+    - name: Assert the MRS systemd service is active
+      ansible.builtin.assert:
+        that: mrs_service.status.ActiveState == 'active'
+        fail_msg: "mrs.service is not active ({{ mrs_service.status.ActiveState }})"
+        success_msg: "mrs.service is active"
+
+    - name: Retrieve the MRS systemd service log for debugging
       when: mrs_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu mrs.service
@@ -79,12 +88,6 @@
     - name: Record the state of the MRS container
       ansible.builtin.set_fact:
         mrs_container: "{{ mrs_container_raw.stdout | from_json | first }}"
-
-    - name: Assert the MRS container is running
-      ansible.builtin.assert:
-        that: mrs_container.State.Status == 'running'
-        fail_msg: "The MRS container is {{ mrs_container.State.Status }}, not running"
-        success_msg: "The MRS container is running"
 
     - name: Assert the running MRS is the version this role installs
       ansible.builtin.assert:
