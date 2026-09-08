@@ -60,7 +60,7 @@
     - name: Retrieve the MRS systemd service log for debugging
       when: mrs_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu mrs.service
+        cmd: journalctl --no-pager --output=cat --unit=mrs.service
       changed_when: false
 
     # The port is the scenario's, not MRS's default of 8080. MRS reads it from
