@@ -32,6 +32,8 @@
     mrs_molecule_base_url: "http://127.0.0.1:{{ mrs_container_http_port }}"
 
   tasks:
+    - name: Verify that MRS works
+      block:
     # The role is not included in this playbook, so its defaults are not in
     # scope. Reading defaults/main.yml directly ties the version assertion
     # below.
@@ -264,3 +266,19 @@
           - "MRS version: {{ mrs_container.Config.Labels['org.opencontainers.image.version'] }}"
           - "MRS port: {{ mrs_container_http_port }}"
           - "MRS Matrix server name: {{ mrs_matrix_key.json.server_name }}"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the MRS systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=mrs.service
+          register: mrs_service_log
+          changed_when: false
+
+        - name: Show the MRS systemd service log
+          ansible.builtin.debug:
+            var: mrs_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "MRS verification failed. The systemd service log is printed above."
