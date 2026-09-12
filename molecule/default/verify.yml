@@ -80,7 +80,7 @@
         # has demonstrably read the file the role rendered. An instance that had
         # not would be listening on nothing at all: with no configuration the
         # process panics before it binds.
-        - name: Wait for MRS to answer on the configured port (up to 10m)
+        - name: Wait for MRS to report itself healthy (up to 180s)
           ansible.builtin.uri:
             url: "{{ mrs_molecule_base_url }}/_health"
             method: GET
@@ -88,8 +88,17 @@
             follow_redirects: none
           register: mrs_health
           until: mrs_health.status == 200
-          retries: 120
+          retries: 36
           delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
+
+        - name: Assert MRS reports itself healthy
+          ansible.builtin.assert:
+            that: mrs_health.status == 200
+            fail_msg: "MRS did not report itself healthy: {{ mrs_health.status | default('no response') }}"
+            success_msg: "MRS reports itself healthy"
 
         - name: Inspect the MRS container
           ansible.builtin.command:
