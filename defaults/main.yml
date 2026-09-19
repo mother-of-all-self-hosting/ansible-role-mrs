@@ -91,6 +91,13 @@ mrs_container_extra_arguments: "{{ mrs_container_extra_arguments_auto + mrs_cont
 mrs_container_extra_arguments_auto: []
 mrs_container_extra_arguments_custom: []
 
+# A list of extra arguments to pass to the process inside the container
+# Example: ['--SOME_ARGUMENT']
+mrs_process_extra_arguments: "{{ mrs_process_extra_arguments_auto + mrs_process_extra_arguments_custom }}"
+mrs_process_extra_arguments_auto:
+  - -c {{ mrs_path_config }}
+mrs_process_extra_arguments_custom: []
+
 # List of systemd services that the MRS systemd service depends on
 mrs_systemd_required_services_list: "{{ mrs_systemd_required_services_list_default + mrs_systemd_required_services_list_auto + mrs_systemd_required_services_list_custom }}"
 mrs_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
