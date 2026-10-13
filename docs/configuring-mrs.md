@@ -18,11 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up Matrix Rooms Search
 
-This is an [Ansible](https://www.ansible.com/) role which installs [Matrix Rooms Search](https://mrsbudget.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [Matrix Rooms Search](https://github.com/etkecc/mrs) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-Matrix Rooms Search is a local-first personal finance tool.
+Matrix Rooms Search is a fully-featured, standalone, [Matrix](https://matrix.org/) rooms search service.
 
-See the project's [documentation](https://mrsbudget.org/docs/) to learn what Matrix Rooms Search does and why it might be useful to you.
+See the project's [documentation](https://github.com/etkecc/mrs/blob/main/README.md) to learn what Matrix Rooms Search does and why it might be useful to you.
 
 ## Adjusting the playbook configuration
 
@@ -107,7 +107,11 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 ## Usage
 
-After running the command for installation, Matrix Rooms Search becomes available at the specified hostname like `https://example.com`. To use it, open the URL on the browser and create an account.
+After running the command for installation, Matrix Rooms Search becomes available at the specified hostname like `https://example.com`.
+
+You can call the `https://mrs.example.com/-/full` endpoint using admin credentials (see the `mrs_auth_admin_*` variables) to discover and parse content.
+
+To see the list of supported public and private APIs, refer to the [API documentation](https://github.com/etkecc/mrs/blob/main/docs/swagger.yaml).
 
 ## Troubleshooting
 
