@@ -58,6 +58,15 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting Matrix Rooms Search under a subpath (by configuring the `mrs_path_prefix` variable) does not seem to be possible due to Matrix Rooms Search's technical limitations.
 
+### Set the default homeserver URLs
+
+It is possible to specify the default homeserver's URLs by adding the following configuration to your `vars.yml` file:
+
+```yaml
+mrs_servers:
+  - matrix.org
+```
+
 ### Extending the configuration
 
 There are some additional things you may wish to configure about the service.
