@@ -28,8 +28,6 @@
   with_items:
     - mrs_uid
     - mrs_gid
-    - mrs_hostname
-    - mrs_container_network
 
 - name: Fail if required MRS + Traefik integration settings not defined
   ansible.builtin.fail:
